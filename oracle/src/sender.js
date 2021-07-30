@@ -118,7 +118,7 @@ async function main({ msg, ackMsg, nackMsg, channel, scheduleForRetry, scheduleT
       nonce = null
     } else {
       logger.info(`Sending ${txArray.length} transactions`)
-      nonce = await readNonce()
+      nonce = await readNonce(true)
     }
     await syncForEach(txArray, async job => {
       let gasLimit
