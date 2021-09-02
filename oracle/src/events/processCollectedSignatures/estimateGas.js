@@ -26,6 +26,12 @@ async function estimateGas({
     if (e instanceof HttpListProviderError) {
       throw e
     }
+    logger.debug('message: ', message)
+    logger.debug('numberOfCollectedSignatures: ', numberOfCollectedSignatures)
+    logger.debug('v: ', v)
+    logger.debug('r: ', r)
+    logger.debug('s: ', s)
+    logger.debug('signatures: ', signatures)
 
     // check if the message was already processed
     logger.debug('Check if the message was already processed')
