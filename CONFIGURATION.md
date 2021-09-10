@@ -42,6 +42,8 @@ ORACLE_HOME_TO_FOREIGN_BLOCK_LIST | Filename with a list of addresses, separated
 ORACLE_HOME_TO_FOREIGN_CHECK_SENDER | If set to `true`, instructs the oracle to do an extra check for transaction origin in the block/allowance list. `false` by default. | `true` / `false`
 ORACLE_ALWAYS_RELAY_SIGNATURES | If set to `true`, the oracle will always relay signatures even if it was not the last who finilized the signatures collecting process. The default is `false`. | `true` / `false`
 ORACLE_RPC_REQUEST_TIMEOUT | Timeout in milliseconds for a single RPC request. Default value is `ORACLE_*_RPC_POLLING_INTERVAL * 2`. | integer
+ORACLE_HOME_RPC_BLOCK_POLLING_LIMIT | Max length for the block range used in `eth_getLogs` requests for polling contract events for the Home chain. Infinite, if not provided. | `integer`
+ORACLE_FOREIGN_RPC_BLOCK_POLLING_LIMIT | Max length for the block range used in `eth_getLogs` requests for polling contract events for the Foreign chain. Infinite, if not provided. | `integer`
 
 
 ## UI configuration
