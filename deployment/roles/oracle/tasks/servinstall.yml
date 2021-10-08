@@ -14,8 +14,8 @@
     state: started
     enabled: yes
     use: service
-  WHEN: SERVICE_ENABLE
+  when: SERVICE_ENABLE
 
 - name: Start the service
   shell: service poabridge start
-  WHEN: SERVICE_ENABLE
+  when: SERVICE_ENABLE
