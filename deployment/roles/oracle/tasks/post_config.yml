@@ -29,7 +29,7 @@
 
 - name: Extend docker compose file for erc to native
   set_fact: composefileoverride="-f docker-compose-transfer.yml"
-  when: ORACLE_BRIDGE_MODE == "ERC_TO_NATIVE"
+  when: ORACLE_BRIDGE_MODE == "ERC_TO_NATIVE" or TRANSFER_ENABLE
 
 - name: Extend docker compose file for amb
   set_fact: composefileoverride="-f docker-compose-amb.yml"
