@@ -84,18 +84,18 @@ async function runMain({ sendToQueue, sendToWorker }) {
 }
 
 async function getLastProcessedBlock() {
-  const result = await redis.get(lastBlockRedisKey)
-  logger.debug({ fromRedis: result, fromConfig: lastProcessedBlock.toString() }, 'Last Processed block obtained')
-  lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
+  if (!envFromBlock) {
+    const result = await redis.get(lastBlockRedisKey)
+    logger.debug({ fromRedis: result, fromConfig: lastProcessedBlock.toString() }, 'Last Processed block obtained')
+    lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
+  }
 }
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
-  if (envFromBlock) {
-    return
+  if (!envFromBlock) {
+    return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
   }
-
-  return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
 }
 
 function processEvents(events) {
