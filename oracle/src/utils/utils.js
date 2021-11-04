@@ -29,6 +29,12 @@ function checkHTTPS(ORACLE_ALLOW_HTTP_FOR_RPC, logger) {
   }
 }
 
+function checkFromBlock(ORACLE_WATCHER_JOB_FROM_BLOCK) {
+  if (!ORACLE_WATCHER_JOB_FROM_BLOCK) {
+    throw new Error(`ORACLE_WATCHER_JOB_FROM_BLOCK not defined in job mode`)
+  }
+}
+
 async function waitForFunds(web3, address, minimumBalance, cb, logger) {
   promiseRetry(
     async retry => {
@@ -134,6 +140,7 @@ async function readAccessListFile(fileName, logger) {
 module.exports = {
   syncForEach,
   checkHTTPS,
+  checkFromBlock,
   waitForFunds,
   addExtraGas,
   setIntervalAndRun,

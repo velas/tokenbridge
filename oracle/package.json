@@ -17,7 +17,12 @@
     "test": "NODE_ENV=test mocha",
     "test:watch": "NODE_ENV=test mocha --watch --reporter=min",
     "coverage": "NODE_ENV=test nyc --reporter=text --reporter=html mocha",
-    "postinstall": "mkdir -p logs"
+    "postinstall": "mkdir -p logs",
+    "watcherJob:signature-request": "./scripts/start-worker.sh watcherJob signature-request-watcher",
+    "watcherJob:collected-signatures": "./scripts/start-worker.sh watcherJob collected-signatures-watcher",
+    "watcherJob:affirmation-request": "./scripts/start-worker.sh watcherJob affirmation-request-watcher",
+    "watcherJob:transfer": "./scripts/start-worker.sh watcherJob transfer-watcher",
+    "watcherJob:convert-to-chai": "./scripts/start-worker.sh watcherJob convert-to-chai-worker",
   },
   "author": "",
   "license": "ISC",
