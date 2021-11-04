@@ -35,7 +35,14 @@ const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.br
 let { eventContractAddress } = config
 let eventContract = new web3Instance.eth.Contract(config.eventAbi, eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
+
+let lastProcessedBlock
+const envFromBlock = process.env.ORACLE_WATCHER_FROM_BLOCK
+if (envFromBlock) {
+  lastProcessedBlock = toBN(envFromBlock)
+} else {
+  lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
+}
 
 async function initialize() {
   try {
@@ -84,6 +91,10 @@ async function getLastProcessedBlock() {
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
+  if (envFromBlock) {
+    return
+  }
+
   return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
 }
 
