@@ -6,7 +6,7 @@ const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
-const { checkHTTPS, watchdog } = require('./utils/utils')
+const { checkHTTPS, watchdog, checkFromBlock } = require('./utils/utils')
 const { EXIT_CODES } = require('./utils/constants')
 const { isChaiTokenEnabled } = require('./utils/chaiUtils')
 
@@ -16,7 +16,6 @@ if (process.argv.length < 3) {
 }
 
 const config = require(path.join('../config/', process.argv[2]))
-const { checkFromBlock } = require('./utils/utils')
 
 const processSignatureRequests = require('./events/processSignatureRequests')(config)
 const processCollectedSignatures = require('./events/processCollectedSignatures')(config)
@@ -164,7 +163,7 @@ async function main({ sendToQueue, sendToWorker }) {
       return
     }
 
-    const fromBlock = process.env.ORACLE_WATCHER_JOB_FROM_BLOCK
+    const fromBlock = parseInt(process.env.ORACLE_WATCHER_JOB_FROM_BLOCK)
     const rangeEndBlock = config.blockPollingLimit ? fromBlock.add(config.blockPollingLimit) : lastBlockToProcess
     const toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
 
