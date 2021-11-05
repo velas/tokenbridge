@@ -39,14 +39,15 @@ const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastBlockToProcess
 let lastProcessedBlock
 const envFromBlock = process.env.ORACLE_WATCHER_FROM_BLOCK
+const envToBlock = process.env.ORACLE_WATCHER_TO_BLOCK
 const envTaskMode = (process.env.ORACLE_TASK_MODE === 'true')
 
 if (envFromBlock) {
   lastProcessedBlock = toBN(envFromBlock)
+  lastProcessedBlock = lastProcessedBlock.sub(ONE)
 } else {
   lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 }
-
 
 async function initialize() {
   try {
@@ -151,6 +152,10 @@ function updateEventContract(address) {
 }
 
 async function getLastBlockToProcess() {
+  if (envToBlock) {
+    return toBN(envToBlock)
+  }
+
   const lastBlockNumberPromise = getBlockNumber(web3Instance).then(toBN)
   const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract).then(toBN)
   const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
@@ -188,8 +193,8 @@ async function main({ sendToQueue, sendToWorker }) {
 
     const fromBlock = lastProcessedBlock.add(ONE)
     const rangeEndBlock = config.blockPollingLimit ? fromBlock.add(config.blockPollingLimit) : lastBlockToProcess
-    const toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
 
+    const toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
