@@ -36,13 +36,17 @@ let { eventContractAddress } = config
 let eventContract = new web3Instance.eth.Contract(config.eventAbi, eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 
+let lastBlockToProcess
 let lastProcessedBlock
 const envFromBlock = process.env.ORACLE_WATCHER_FROM_BLOCK
+const envTaskMode = (process.env.ORACLE_TASK_MODE === 'true')
+
 if (envFromBlock) {
   lastProcessedBlock = toBN(envFromBlock)
 } else {
   lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 }
+
 
 async function initialize() {
   try {
@@ -50,7 +54,9 @@ async function initialize() {
 
     web3Instance.currentProvider.urls.forEach(checkHttps(config.chain))
 
-    await getLastProcessedBlock()
+    if (!envTaskMode) {
+      await getLastProcessedBlock()
+    }
     connectWatcherToQueue({
       queueName: config.queue,
       workerQueue: config.workerQueue,
@@ -84,16 +90,14 @@ async function runMain({ sendToQueue, sendToWorker }) {
 }
 
 async function getLastProcessedBlock() {
-  if (!envFromBlock) {
-    const result = await redis.get(lastBlockRedisKey)
-    logger.debug({ fromRedis: result, fromConfig: lastProcessedBlock.toString() }, 'Last Processed block obtained')
-    lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
-  }
+  const result = await redis.get(lastBlockRedisKey)
+  logger.debug({ fromRedis: result, fromConfig: lastProcessedBlock.toString() }, 'Last Processed block obtained')
+  lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
 }
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
-  if (!envFromBlock) {
+  if (!envTaskMode) {
     return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
   }
 }
@@ -170,10 +174,15 @@ async function main({ sendToQueue, sendToWorker }) {
   try {
     await checkConditions()
 
-    const lastBlockToProcess = await getLastBlockToProcess()
+    if (!lastBlockToProcess || !envTaskMode) {
+      lastBlockToProcess = await getLastBlockToProcess()
+    }
 
     if (lastBlockToProcess.lte(lastProcessedBlock)) {
       logger.debug('All blocks already processed')
+      if (envTaskMode) {
+        process.exit()
+      }
       return
     }
 
