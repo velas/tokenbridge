@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     volumes: ['~/bridge_data/redis:/data']
   bridge_request:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
@@ -44,7 +44,7 @@ services:
       - net_db_bridge_request
       - net_rabbit_bridge_request
   bridge_collected:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
@@ -57,7 +57,7 @@ services:
       - net_db_bridge_collected
       - net_rabbit_bridge_collected
   bridge_affirmation:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
@@ -70,7 +70,7 @@ services:
       - net_db_bridge_affirmation
       - net_rabbit_bridge_affirmation
   bridge_senderhome:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
@@ -83,7 +83,7 @@ services:
       - net_db_bridge_senderhome
       - net_rabbit_bridge_senderhome
   bridge_senderforeign:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
@@ -96,7 +96,7 @@ services:
       - net_db_bridge_senderforeign
       - net_rabbit_bridge_senderforeign
   bridge_shutdown:
-    cpus: 0.1
+    cpus: 0.3
     mem_limit: 500m
     image: {{TOKENBRIDGE_DOCKER_IMAGE}}:{{TOKENBRIDGE_DOCKER_TAG}}
     env_file: ./.env
