@@ -134,7 +134,6 @@ async function readAccessListFile(fileName, logger) {
 module.exports = {
   syncForEach,
   checkHTTPS,
-  checkFromBlock,
   waitForFunds,
   addExtraGas,
   setIntervalAndRun,
