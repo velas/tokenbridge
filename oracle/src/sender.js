@@ -201,7 +201,7 @@ async function main({ msg, ackMsg, nackMsg, channel, scheduleForRetry, scheduleT
 
     if (failedTx.length) {
       logger.info(`Sending ${failedTx.length} Failed Tx to Queue`)
-      // await scheduleForRetry(failedTx, msg.properties.headers['x-retries'])
+      await scheduleForRetry(failedTx, msg.properties.headers['x-retries'])
     }
     if (resendJobs.length) {
       logger.info(`Sending ${resendJobs.length} Tx Delayed Resend Requests to Queue`)
