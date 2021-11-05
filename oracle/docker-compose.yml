@@ -2,8 +2,6 @@
 version: '2.4'
 services:
   rabbit:
-    cpus: 0.3
-    mem_limit: 500m
     environment: ['RABBITMQ_NODENAME=node@rabbit']
     hostname: rabbit
     image: rabbitmq:3
@@ -16,8 +14,6 @@ services:
     restart: unless-stopped
     volumes: ['~/bridge_data/rabbitmq:/var/lib/rabbitmq/mnesia']
   redis:
-    cpus: 0.1
-    mem_limit: 500m
     command: [redis-server, --appendonly, 'yes']
     hostname: redis
     image: redis:4
@@ -30,8 +26,6 @@ services:
     restart: unless-stopped
     volumes: ['~/bridge_data/redis:/data']
   bridge_request:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
     environment:
@@ -43,8 +37,6 @@ services:
       - net_db_bridge_request
       - net_rabbit_bridge_request
   bridge_collected:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
     environment:
@@ -56,8 +48,6 @@ services:
       - net_db_bridge_collected
       - net_rabbit_bridge_collected
   bridge_affirmation:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
     environment:
@@ -69,8 +59,6 @@ services:
       - net_db_bridge_affirmation
       - net_rabbit_bridge_affirmation
   bridge_senderhome:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
     environment:
@@ -82,8 +70,6 @@ services:
       - net_db_bridge_senderhome
       - net_rabbit_bridge_senderhome
   bridge_senderforeign:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
     environment:
