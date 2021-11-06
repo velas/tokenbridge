@@ -38,9 +38,17 @@ const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 
 let lastBlockToProcess
 let lastProcessedBlock
+let blockLag
+
+const envBlockLag = process.env.ORACLE_WATCHER_BLOCK_LAG
 const envFromBlock = process.env.ORACLE_WATCHER_FROM_BLOCK
 const envToBlock = process.env.ORACLE_WATCHER_TO_BLOCK
 const envTaskMode = (process.env.ORACLE_TASK_MODE === 'true')
+
+if (envBlockLag) {
+  blockLag = toBN(envBlockLag)
+  logger.debug({ blockLag: envBlockLag }, 'Block lag used')
+}
 
 if (envFromBlock) {
   lastProcessedBlock = toBN(envFromBlock)
@@ -191,10 +199,16 @@ async function main({ sendToQueue, sendToWorker }) {
       return
     }
 
-    const fromBlock = lastProcessedBlock.add(ONE)
+    let fromBlock = lastProcessedBlock.add(ONE)
     const rangeEndBlock = config.blockPollingLimit ? fromBlock.add(config.blockPollingLimit) : lastBlockToProcess
 
-    const toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
+    let toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
+
+    if (blockLag) {
+      fromBlock = fromBlock.sub(blockLag)
+      toBlock = toBlock.sub(blockLag)
+    }
+
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
