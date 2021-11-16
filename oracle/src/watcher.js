@@ -35,7 +35,27 @@ const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.br
 let { eventContractAddress } = config
 let eventContract = new web3Instance.eth.Contract(config.eventAbi, eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
+
+let lastBlockToProcess
+let lastProcessedBlock
+let blockLag
+
+const envBlockLag = process.env.ORACLE_WATCHER_BLOCK_LAG
+const envFromBlock = process.env.ORACLE_WATCHER_FROM_BLOCK
+const envToBlock = process.env.ORACLE_WATCHER_TO_BLOCK
+const envTaskMode = (process.env.ORACLE_TASK_MODE === 'true')
+
+if (envBlockLag) {
+  blockLag = toBN(envBlockLag)
+  logger.debug({ blockLag: envBlockLag }, 'Block lag used')
+}
+
+if (envFromBlock) {
+  lastProcessedBlock = toBN(envFromBlock)
+  lastProcessedBlock = lastProcessedBlock.sub(ONE)
+} else {
+  lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
+}
 
 async function initialize() {
   try {
@@ -43,7 +63,9 @@ async function initialize() {
 
     web3Instance.currentProvider.urls.forEach(checkHttps(config.chain))
 
-    await getLastProcessedBlock()
+    if (!envTaskMode) {
+      await getLastProcessedBlock()
+    }
     connectWatcherToQueue({
       queueName: config.queue,
       workerQueue: config.workerQueue,
@@ -84,7 +106,9 @@ async function getLastProcessedBlock() {
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
-  return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
+  if (!envTaskMode) {
+    return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
+  }
 }
 
 function processEvents(events) {
@@ -136,6 +160,10 @@ function updateEventContract(address) {
 }
 
 async function getLastBlockToProcess() {
+  if (envToBlock) {
+    return toBN(envToBlock)
+  }
+
   const lastBlockNumberPromise = getBlockNumber(web3Instance).then(toBN)
   const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract).then(toBN)
   const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
@@ -159,16 +187,27 @@ async function main({ sendToQueue, sendToWorker }) {
   try {
     await checkConditions()
 
-    const lastBlockToProcess = await getLastBlockToProcess()
+    if (!lastBlockToProcess || !envTaskMode) {
+      lastBlockToProcess = await getLastBlockToProcess()
+    }
 
     if (lastBlockToProcess.lte(lastProcessedBlock)) {
       logger.debug('All blocks already processed')
+      if (envTaskMode) {
+        process.exit()
+      }
       return
     }
 
-    const fromBlock = lastProcessedBlock.add(ONE)
+    let fromBlock = lastProcessedBlock.add(ONE)
     const rangeEndBlock = config.blockPollingLimit ? fromBlock.add(config.blockPollingLimit) : lastBlockToProcess
-    const toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
+
+    let toBlock = BN.min(lastBlockToProcess, rangeEndBlock)
+
+    if (blockLag) {
+      fromBlock = fromBlock.sub(blockLag)
+      toBlock = toBlock.sub(blockLag)
+    }
 
     const events = await getEvents({
       contract: eventContract,

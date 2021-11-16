@@ -2,8 +2,6 @@
 version: '2.4'
 services:
   rabbit:
-    cpus: 0.3
-    mem_limit: 500m
     environment: ['RABBITMQ_NODENAME=node@rabbit']
     hostname: rabbit
     image: rabbitmq:3
@@ -16,12 +14,10 @@ services:
     restart: unless-stopped
     volumes: ['~/bridge_data/rabbitmq:/var/lib/rabbitmq/mnesia']
   redis:
-    cpus: 0.1
-    mem_limit: 500m
     command: [redis-server, --appendonly, 'yes']
     hostname: redis
     image: redis:4
-    networks:    
+    networks:
       - net_db_bridge_request
       - net_db_bridge_collected
       - net_db_bridge_affirmation
@@ -30,12 +26,10 @@ services:
     restart: unless-stopped
     volumes: ['~/bridge_data/redis:/data']
   bridge_request:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
+    environment:
+      - NODE_ENV=production
       - ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY=${ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: yarn watcher:signature-request
@@ -43,12 +37,10 @@ services:
       - net_db_bridge_request
       - net_rabbit_bridge_request
   bridge_collected:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
+    environment:
+      - NODE_ENV=production
       - ORACLE_VALIDATOR_ADDRESS=${ORACLE_VALIDATOR_ADDRESS}
     restart: unless-stopped
     entrypoint: yarn watcher:collected-signatures
@@ -56,12 +48,10 @@ services:
       - net_db_bridge_collected
       - net_rabbit_bridge_collected
   bridge_affirmation:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
+    environment:
+      - NODE_ENV=production
       - ORACLE_VALIDATOR_ADDRESS=${ORACLE_VALIDATOR_ADDRESS}
     restart: unless-stopped
     entrypoint: yarn watcher:affirmation-request
@@ -69,12 +59,10 @@ services:
       - net_db_bridge_affirmation
       - net_rabbit_bridge_affirmation
   bridge_senderhome:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
+    environment:
+      - NODE_ENV=production
       - ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY=${ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: yarn sender:home
@@ -82,18 +70,72 @@ services:
       - net_db_bridge_senderhome
       - net_rabbit_bridge_senderhome
   bridge_senderforeign:
-    cpus: 0.1
-    mem_limit: 500m
     image: poanetwork/tokenbridge-oracle:latest
     env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
+    environment:
+      - NODE_ENV=production
       - ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY=${ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: yarn sender:foreign
     networks:
       - net_db_bridge_senderforeign
       - net_rabbit_bridge_senderforeign
+  bridge_affirmation_task:
+    entrypoint: yarn watcher:affirmation-request
+    env_file: ./.env
+    environment:
+      - NODE_ENV=production
+      - ORACLE_VALIDATOR_ADDRESS=${ORACLE_VALIDATOR_ADDRESS}
+      - ORACLE_TASK_MODE=true
+      - ORACLE_WATCHER_FROM_BLOCK=0
+      - ORACLE_WATCHER_TO_BLOCK=0
+    image: public.ecr.aws/u6u9e0g3/velas-tokenbridge:053606b6204c0693a364c806c4db64cb5f9aa60f_3
+    logging:
+      driver: syslog
+      options:
+        tag: '{{.Name}}/{{.ID}}'
+    networks:
+      - net_db_bridge_affirmation
+      - net_rabbit_bridge_affirmation
+    restart: on-failure
+  bridge_request_task:
+    entrypoint: yarn watcher:signature-request
+    env_file: ./.env
+    environment:
+      - NODE_ENV=production
+      - ORACLE_VALIDATOR_ADDRESS=${ORACLE_VALIDATOR_ADDRESS}
+      - ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY=${ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY}
+      - ORACLE_TASK_MODE=true
+      - ORACLE_WATCHER_FROM_BLOCK=0
+      - ORACLE_WATCHER_TO_BLOCK=0
+    image: public.ecr.aws/u6u9e0g3/velas-tokenbridge:053606b6204c0693a364c806c4db64cb5f9aa60f_3
+    logging:
+      driver: syslog
+      options:
+        tag: '{{.Name}}/{{.ID}}'
+    networks:
+      - net_db_bridge_affirmation
+      - net_rabbit_bridge_affirmation
+    restart: on-failure
+  bridge_collected_task:
+    entrypoint: yarn watcher:collected-signatures
+    env_file: ./.env
+    environment:
+      - NODE_ENV=production
+      - ORACLE_VALIDATOR_ADDRESS=${ORACLE_VALIDATOR_ADDRESS}
+      - ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY=${ORACLE_VALIDATOR_ADDRESS_PRIVATE_KEY}
+      - ORACLE_TASK_MODE=true
+      - ORACLE_WATCHER_FROM_BLOCK=0
+      - ORACLE_WATCHER_TO_BLOCK=0
+    image: public.ecr.aws/u6u9e0g3/velas-tokenbridge:053606b6204c0693a364c806c4db64cb5f9aa60f_3
+    logging:
+      driver: syslog
+      options:
+        tag: '{{.Name}}/{{.ID}}'
+    networks:
+      - net_db_bridge_affirmation
+      - net_rabbit_bridge_affirmation
+    restart: on-failure
 
 networks:
   net_db_bridge_request:
