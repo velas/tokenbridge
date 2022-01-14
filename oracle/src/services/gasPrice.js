@@ -61,6 +61,8 @@ async function start(chainId, fetchOnce) {
     factor = Number(COMMON_HOME_GAS_PRICE_FACTOR) || DEFAULT_GAS_PRICE_FACTOR
 
     cachedGasPrice = COMMON_HOME_GAS_PRICE_FALLBACK
+    console.log('COMMON_HOME_GAS_PRICE_FALLBACK: ', cachedGasPrice)
+    console.log('COMMON_HOME_GAS_PRICE_SUPPLIER_URL: ', gasPriceSupplierUrl)
   } else if (chainId === 'foreign') {
     bridgeContract = foreignBridge
     gasPriceSupplierUrl = COMMON_FOREIGN_GAS_PRICE_SUPPLIER_URL

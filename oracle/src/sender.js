@@ -104,7 +104,7 @@ async function main({ msg, ackMsg, nackMsg, channel, scheduleForRetry, scheduleT
     const txArray = JSON.parse(msg.content)
     logger.debug(`Msg received with ${txArray.length} Tx to send`)
     const gasPrice = GasPrice.getPrice().toString(10)
-
+    logger.info(`sending with gas price (sender) ${gasPrice} `)
     let nonce
     let insufficientFunds = false
     let minimumBalance = null

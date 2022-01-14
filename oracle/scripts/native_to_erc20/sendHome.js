@@ -24,6 +24,7 @@ async function main() {
     let nonce = await web3Home.eth.getTransactionCount(USER_ADDRESS)
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
+      console.log('sending tx with gas price (scripts):', HOME_TEST_TX_GAS_PRICE)
       const txHash = await sendTx({
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data: '0x',

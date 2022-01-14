@@ -147,7 +147,7 @@ async function sendJobTx(jobs) {
     } else {
       gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE, MAX_GAS_LIMIT)
     }
-
+    console.log('sending tx with gas price (confirmRelay):', gasPrice.toString(10))
     try {
       logger.info(`Sending transaction with nonce ${nonce}`)
       const txHash = await sendTx({

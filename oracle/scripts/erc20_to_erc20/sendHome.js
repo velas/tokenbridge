@@ -63,6 +63,7 @@ async function main() {
       const data = await erc677.methods
         .transferAndCall(COMMON_HOME_BRIDGE_ADDRESS, toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
+
       const txHash = await sendTx({
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
