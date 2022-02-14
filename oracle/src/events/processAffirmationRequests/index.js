@@ -67,7 +67,7 @@ function processAffirmationRequestsBuilder(config) {
             return
           } else {
             logger.error(e, 'Unknown error while processing transaction')
-            throw e
+            // throw e
           }
         }
 
